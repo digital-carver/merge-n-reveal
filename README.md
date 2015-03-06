@@ -1,26 +1,35 @@
 # merge-n-reveal
 Create a single Reveal.js index file from a bunch of files containing topic-specific slides
 
-* Step 1: Create a bunch of topic files that contain slides within \<section\> tags. For eg., basic\_magic.html, boom\_and\_kaboom.html, veil\_and\_vanish.html
+* Step 1: Create a bunch of topic files that contain slides within \<section\> tags. Say, basic\_magic.html, thaumaturgy\_basic.html, thaumaturgy\_advanced.html, boom\_and\_kaboom.html, veil\_and\_vanish.html
+
 * Step 2: When you want to create a Reveal.js presentation, decide what topics should go in this presentation, and make a JSON file similar to the ones below: 
 
-  1. offensive\_magic.json
+####  defensive\_magic.json
 ```json
 {
     "files": [
-        /path/to/basic_magic.html,
-        /path/to/boom_and_kaboom.html,
+        "basic_magic",
+        "./subfolder_path/thaumaturgy_basic",
+        "./subfolder_path/veil_and_vanish",
     ]
 }
 ```
 
-  2. defensive\_magic.json
+####  offensive\_magic.json
 ```json
 {
     "files": [
-        /path/to/basic_magic.html,
-        /path/to/veil_and_vanish.html
-    ]
+        "basic_magic",
+        {
+            "./subfolder_path": [
+                "boom_and_kaboom",
+                "thaumaturgy_basic",
+                "thaumaturgy_advanced",
+            ]
+        }
+    ],
+    "theme": "beige"
 }
 ```
 
