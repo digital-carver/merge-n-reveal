@@ -33,8 +33,13 @@ Create a single Reveal.js index file from a bunch of files containing topic-spec
 }
 ```
 
-* Step 3: Run `merge_n_reveal.pl your_magic.json` to get a your\_magic.html file which has all the slides which were mentioned in the json file, along with the basic reveal.js boilerplate
+* Step 3: Run `merge_n_reveal.pl --topicsfile /path/to/your_magic.json --revealdir <reveal.js repository folder>`.
 
-* Step 4: Copy the generated html file into the reveal.js folder as `index.html` 
+* Step 4: Check out the `present` folder within the folder that contains `your_magic.json`: that folder is now your presentation, and its index.html contains all the content from the slides you mentioned in the order you mentioned them.
+
+TODO:
+
+* Remove the `.git` folder from under `present`
+* Make the reading of `index.html` content more robust with HTML::TreeBuilder or something
 
 
