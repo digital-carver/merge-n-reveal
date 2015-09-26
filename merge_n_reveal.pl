@@ -56,16 +56,36 @@ sub main
     my $present_dir = File::Spec->join($content_dir, "present");
     dircopy($reveal_repo_dir, $present_dir);
     #TODO exclude or remove .git directory
-    open(my $reveal_index, '<', File::Spec->join($reveal_repo_dir, 'index.html'));
-    open(my $presentation, '>', File::Spec->join($present_dir, 'index.html'));
+    open(my $reveal_index, '<', File::Spec->join($reveal_repo_dir, 'index.html')) or die "Couldn't open repo index.html: $OS_ERROR";
+    open(my $presentation, '>', File::Spec->join($present_dir, 'index.html')) or die "Couldn't open present/index.html: $OS_ERROR";
 
     my $line;
     while (($line = <$reveal_index>) !~ m/<div class="slides">/) { #FIXME regex parsing on HTML
         print $presentation $line;
     }
     print $presentation $line; #print the class="slides" line also to the file
-    chdir($content_dir);
 
+    chdir($content_dir); #JSON lists filepaths relative to itself, so cd there
+    for my $slide_filename (@file_list) {
+        $slide_filename .= '.html';
+        open(my $slide_file, '<', $slide_filename) or die "Couldn't open $slide_filename: $OS_ERROR";
+        my $slide_content;
+        { local $RS = undef; $slide_content = (<$slide_file>);}
+        print $presentation $slide_content;
+        close($slide_file);
+    }
+
+    while (defined($line = <$reveal_index>) && ($line !~ m|<script src="lib/js/head\.min\.js"></script>|)) {
+        ; #skip all the lines till the div.slides gets closed
+        #XXX HACK: will break if the line after the div closure changes
+    }
+    print $presentation "</div>\n</div>\n";
+    print $presentation $line; #print the head.min.js line
+    while (defined($line = <$reveal_index>)) {
+        print $presentation $line;
+    }
+
+    close($presentation);
     close($reveal_index);
 }
 
