@@ -8,8 +8,8 @@ use Getopt::Long;
 use JSON;
 use Data::Dumper;
 use File::Basename;
-use File::Spec qw(catfile);
-use File::Copy::Recursive;
+use File::Spec;
+use File::Copy::Recursive qw(dircopy);
 
 main();
 
@@ -23,8 +23,10 @@ sub main
         die("Usage: $0 --topicsfile <file.json> --revealdir <path_to_reveal.js_repo>\n");
     }
 
+    # splits into drive, directory path, filename
+    my (undef, $content_dir, undef) = File::Spec->splitpath($topics_file_name);
+
     open(my $topics_file, '<', $topics_file_name) or die "Unable to open $topics_file_name: $OS_ERROR";
-    chdir(basename($topics_file_name));
 
     my $json_text;
     { local $RS = undef; $json_text = (<$topics_file>);}
@@ -51,6 +53,20 @@ sub main
     print "DEBUG @file_list";
     close($topics_file);
 
+    my $present_dir = File::Spec->join($content_dir, "present");
+    dircopy($reveal_repo_dir, $present_dir);
+    #TODO exclude or remove .git directory
+    open(my $reveal_index, '<', File::Spec->join($reveal_repo_dir, 'index.html'));
+    open(my $presentation, '>', File::Spec->join($present_dir, 'index.html'));
+
+    my $line;
+    while (($line = <$reveal_index>) !~ m/<div class="slides">/) { #FIXME regex parsing on HTML
+        print $presentation $line;
+    }
+    print $presentation $line; #print the class="slides" line also to the file
+    chdir($content_dir);
+
+    close($reveal_index);
 }
 
 
