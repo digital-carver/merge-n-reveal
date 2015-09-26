@@ -5,7 +5,7 @@ Create a single Reveal.js index file from a bunch of files containing topic-spec
 
 * Step 2: When you want to create a Reveal.js presentation, decide what topics should go in this presentation, and make a JSON file similar to the ones below: 
 
-####  defensive\_magic.json
+#####  defensive\_magic.json
 ```json
 {
     "files": [
@@ -16,7 +16,7 @@ Create a single Reveal.js index file from a bunch of files containing topic-spec
 }
 ```
 
-####  offensive\_magic.json
+#####  offensive\_magic.json
 ```json
 {
     "files": [

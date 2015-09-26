@@ -4,19 +4,27 @@ use strict;
 use warnings;
 use English qw(-no_match_vars);
 
+use Getopt::Long;
 use JSON;
 use Data::Dumper;
+use File::Basename;
+use File::Spec qw(catfile);
+use File::Copy::Recursive;
 
 main();
 
 sub main
 {
-    unless (@ARGV) {
-        die "Usage: $0 <topic_list.json>";
+    my $topics_file_name;
+    my $reveal_repo_dir;
+    my $getopt_success = GetOptions("topicsfile=s" => \$topics_file_name, 
+                                    "revealdir=s" => \$reveal_repo_dir);
+    unless ($getopt_success && defined($topics_file_name) && defined($reveal_repo_dir)) {
+        die("Usage: $0 --topicsfile <file.json> --revealdir <path_to_reveal.js_repo>\n");
     }
 
-    my $topics_file_name = shift @ARGV;
     open(my $topics_file, '<', $topics_file_name) or die "Unable to open $topics_file_name: $OS_ERROR";
+    chdir(basename($topics_file_name));
 
     my $json_text;
     { local $RS = undef; $json_text = (<$topics_file>);}
@@ -40,7 +48,9 @@ sub main
         }
     }
 
-    print "@file_list";
+    print "DEBUG @file_list";
+    close($topics_file);
+
 }
 
 
