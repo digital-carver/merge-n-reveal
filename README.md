@@ -39,7 +39,6 @@ Create a single Reveal.js index file from a bunch of files containing topic-spec
 
 TODO:
 
-* Remove the `.git` folder from under `present`
 * Make the reading of `index.html` content more robust with HTML::TreeBuilder or something
 
 
