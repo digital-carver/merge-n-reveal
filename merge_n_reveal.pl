@@ -6,7 +6,6 @@ use English qw(-no_match_vars);
 
 use Getopt::Long;
 use JSON;
-use Data::Dumper;
 use File::Basename;
 use File::Spec;
 use File::Copy::Recursive qw(dircopy);
@@ -55,6 +54,7 @@ sub main
 
     my $present_dir = File::Spec->join($content_dir, "present");
     dircopy($reveal_repo_dir, $present_dir);
+    File::Copy::Recursive::pathrmdir($present_dir.'/.git/') or warn(".git folder couldn't be removed from present/ $!");
     #TODO exclude or remove .git directory
     open(my $reveal_index, '<', File::Spec->join($reveal_repo_dir, 'index.html')) or die "Couldn't open repo index.html: $OS_ERROR";
     open(my $presentation, '>', File::Spec->join($present_dir, 'index.html')) or die "Couldn't open present/index.html: $OS_ERROR";
