@@ -8,6 +8,7 @@ Create a single Reveal.js index file from a bunch of files containing topic-spec
 #####  defensive\_magic.json
 ```json
 {
+    "title": "Defensive magic",
     "files": [
         "basic_magic",
         "./subfolder_path/thaumaturgy_basic",
@@ -19,6 +20,7 @@ Create a single Reveal.js index file from a bunch of files containing topic-spec
 #####  offensive\_magic.json
 ```json
 {
+    "title": "Offensive magic!",
     "files": [
         "basic_magic",
         {
@@ -40,5 +42,6 @@ Create a single Reveal.js index file from a bunch of files containing topic-spec
 TODO:
 
 * Make the reading of `index.html` content more robust with HTML::TreeBuilder or something
-
+* Using the above tree, allow customizing the CSS theme used, make title change more robust, etc.
+* Allow changing other Reveal configuration from the JSON, implement them by adding calls to Reveal.configure() 
 

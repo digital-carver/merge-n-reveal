@@ -49,18 +49,23 @@ sub main
         }
     }
 
-    print "DEBUG @file_list";
+    my $title = 'Presentation';
+    if (exists($in->{title})) {
+        $title = $in->{title};
+    }
+
+    print "List of slide files: @file_list\n";
     close($topics_file);
 
     my $present_dir = File::Spec->join($content_dir, "present");
     dircopy($reveal_repo_dir, $present_dir);
     File::Copy::Recursive::pathrmdir($present_dir.'/.git/') or warn(".git folder couldn't be removed from present/ $!");
-    #TODO exclude or remove .git directory
     open(my $reveal_index, '<', File::Spec->join($reveal_repo_dir, 'index.html')) or die "Couldn't open repo index.html: $OS_ERROR";
     open(my $presentation, '>', File::Spec->join($present_dir, 'index.html')) or die "Couldn't open present/index.html: $OS_ERROR";
 
     my $line;
     while (($line = <$reveal_index>) !~ m/<div class="slides">/) { #FIXME regex parsing on HTML
+        $line =~ s|<title>\K(.*?)(?=</title>)|$title|; #XXX hack upon a hack!
         print $presentation $line;
     }
     print $presentation $line; #print the class="slides" line also to the file
