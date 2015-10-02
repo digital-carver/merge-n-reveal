@@ -37,11 +37,11 @@ sub main
         foreach my $elem (@$files) {
             if (ref($elem) eq "HASH") {
                 while (my ($key, $val) = each(%$elem)) {
-                    push @file_list, map { $key . '/' . $_ } @$val;
+                    push @file_list, map { $key . '/' . $_ . '.html' } @$val;
                 }
             }
             elsif (! ref($elem)) {
-                push @file_list, $elem;
+                push @file_list, ($elem . '.html');
             }
             else {
                 die 'Blaargh!! Something is wrong with the JSON in files - found a ' . ref($elem); 
@@ -52,6 +52,11 @@ sub main
     my $title = 'Presentation';
     if (exists($in->{title})) {
         $title = $in->{title};
+    }
+
+    my $config_json;
+    if (exists($in->{config})) {
+        $config_json = to_json($in->{config}, {utf8=>1, pretty=>1}); #convert back to JSON!
     }
 
     print "List of slide files: @file_list\n";
@@ -72,7 +77,7 @@ sub main
 
     chdir($content_dir); #JSON lists filepaths relative to itself, so cd there
     for my $slide_filename (@file_list) {
-        $slide_filename .= '.html';
+        #$slide_filename .= '.html';
         open(my $slide_file, '<', $slide_filename) or die "Couldn't open $slide_filename: $OS_ERROR";
         my $slide_content;
         { local $RS = undef; $slide_content = (<$slide_file>);}
@@ -87,6 +92,14 @@ sub main
     print $presentation "</div>\n</div>\n";
     print $presentation $line; #print the head.min.js line
     while (defined($line = <$reveal_index>)) {
+        if ($line =~ m|</body>|) { #the amount of XXX hacks is too damn high!
+            print $presentation <<CONFIG_SCRIPT
+<script>
+Reveal.configure($config_json);
+</script>
+
+CONFIG_SCRIPT
+        }
         print $presentation $line;
     }
 

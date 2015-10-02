@@ -44,4 +44,6 @@ TODO:
 * Make the reading of `index.html` content more robust with HTML::TreeBuilder or something
 * Using the above tree, allow customizing the CSS theme used, make title change more robust, etc.
 * Allow changing other Reveal configuration from the JSON, implement them by adding calls to Reveal.configure() 
+* Find a way to allow discontinuous slides from a single folder. In general, make the file inclusion syntax saner (maybe just remove the complex `"{ ./subfolder_path": [ ... ] }` form and require path specification for every slide individually).
+
 
