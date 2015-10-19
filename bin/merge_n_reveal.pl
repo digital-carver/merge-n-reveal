@@ -10,8 +10,6 @@ use File::Basename;
 use File::Spec;
 use File::Copy::Recursive qw(dircopy);
 
-main();
-
 sub main
 {
     my $topics_file_name;
@@ -107,4 +105,8 @@ CONFIG_SCRIPT
     close($reveal_index);
 }
 
+unless (defined caller) {
+    main();
+}
 
+1;
