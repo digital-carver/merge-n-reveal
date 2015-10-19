@@ -105,6 +105,12 @@ CONFIG_SCRIPT
     close($reveal_index);
 }
 
+sub parse_args
+{
+    my $ARGV_REF = shift;
+    return undef;
+}
+
 unless (defined caller) {
     main();
 }
