@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use English qw(-no_match_vars);
 
-use Getopt::Long;
+use Getopt::Long qw(GetOptionsFromArray);
 use JSON;
 use File::Basename;
 use File::Spec;
@@ -12,11 +12,9 @@ use File::Copy::Recursive qw(dircopy);
 
 sub main
 {
-    my $topics_file_name;
-    my $reveal_repo_dir;
-    my $getopt_success = GetOptions("topicsfile=s" => \$topics_file_name, 
-                                    "revealdir=s" => \$reveal_repo_dir);
-    unless ($getopt_success && defined($topics_file_name) && defined($reveal_repo_dir)) {
+    my ($topics_file_name, $reveal_repo_dir) = parse_args(\@ARGV);
+
+    unless (defined($topics_file_name)) {
         die("Usage: $0 --topicsfile <file.json> --revealdir <path_to_reveal.js_repo>\n");
     }
 
@@ -108,7 +106,15 @@ CONFIG_SCRIPT
 sub parse_args
 {
     my $ARGV_REF = shift;
-    return undef;
+    my $topics_file_name;
+    my $reveal_repo_dir;
+    my $getopt_success = GetOptionsFromArray($ARGV_REF,
+                                            "topicsfile=s" => \$topics_file_name, 
+                                            "revealdir=s" => \$reveal_repo_dir);
+    unless ($getopt_success && defined($topics_file_name) && defined($reveal_repo_dir)) {
+        return undef;
+    }
+    return ($topics_file_name, $reveal_repo_dir);
 }
 
 unless (defined caller) {
