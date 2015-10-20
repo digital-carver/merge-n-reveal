@@ -5,10 +5,13 @@ use warnings;
 use English qw(-no_match_vars);
 
 use Getopt::Long qw(GetOptionsFromArray);
-use JSON;
 use File::Basename;
 use File::Spec;
 use File::Copy::Recursive qw(dircopy);
+
+use FindBin qw($Bin);
+use lib "$Bin/../lib/";
+use RevealMerger;
 
 sub main
 {
@@ -18,45 +21,8 @@ sub main
         die("Usage: $0 --topicsfile <file.json> --revealdir <path_to_reveal.js_repo>\n");
     }
 
-    # splits into drive, directory path, filename
-    my (undef, $content_dir, undef) = File::Spec->splitpath($topics_file_name);
-
-    open(my $topics_file, '<', $topics_file_name) or die "Unable to open $topics_file_name: $OS_ERROR";
-
-    my $json_text;
-    { local $RS = undef; $json_text = (<$topics_file>);}
-    my $in = decode_json($json_text);
-
-    my @file_list;
-    if (exists($in->{files})) {
-        my $files = $in->{files};
-        foreach my $elem (@$files) {
-            if (ref($elem) eq "HASH") {
-                while (my ($key, $val) = each(%$elem)) {
-                    push @file_list, map { $key . '/' . $_ . '.html' } @$val;
-                }
-            }
-            elsif (! ref($elem)) {
-                push @file_list, ($elem . '.html');
-            }
-            else {
-                die 'Blaargh!! Something is wrong with the JSON in files - found a ' . ref($elem); 
-            }
-        }
-    }
-
-    my $title = 'Presentation';
-    if (exists($in->{title})) {
-        $title = $in->{title};
-    }
-
-    my $config_json;
-    if (exists($in->{config})) {
-        $config_json = to_json($in->{config}, {utf8=>1, pretty=>1}); #convert back to JSON!
-    }
-
-    print "List of slide files: @file_list\n";
-    close($topics_file);
+    my $content_dir = RevealMerger::find_content_dir($topics_file_name); 
+    my ($title, $config_json, @slide_files) = RevealMerger::read_topics_file($topics_file_name);
 
     my $present_dir = File::Spec->join($content_dir, "present");
     dircopy($reveal_repo_dir, $present_dir);
@@ -72,7 +38,7 @@ sub main
     print $presentation $line; #print the class="slides" line also to the file
 
     chdir($content_dir); #JSON lists filepaths relative to itself, so cd there
-    for my $slide_filename (@file_list) {
+    for my $slide_filename (@slide_files) {
         #$slide_filename .= '.html';
         open(my $slide_file, '<', $slide_filename) or die "Couldn't open $slide_filename: $OS_ERROR";
         my $slide_content;
