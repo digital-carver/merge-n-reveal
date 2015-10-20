@@ -23,6 +23,7 @@ sub main
 
     my $content_dir = RevealMerger::find_content_dir($topicsfile_name);
     my ($title, $config_json, @slide_files) = RevealMerger::read_topicsfile($topicsfile_name);
+    print_slides_list(@slide_files);
 
     my $present_dir = File::Spec->join($content_dir, "present");
     dircopy($reveal_repo_dir, $present_dir);
@@ -81,6 +82,13 @@ sub parse_args
         return undef;
     }
     return ($topicsfile_name, $reveal_repo_dir);
+}
+
+sub print_slides_list
+{
+    print "These slide files will be included:\n";
+    local $LIST_SEPARATOR = "\n";
+    print "@_\n";
 }
 
 unless (defined caller) {

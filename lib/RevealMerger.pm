@@ -27,17 +27,34 @@ sub read_topicsfile
 
     open(my $topicsfile, '<', $topicsfile_name) or die "Unable to open $topicsfile_name: $OS_ERROR";
 
-    my $json_text;
-    { local $RS = undef; $json_text = (<$topicsfile>);}
-
+    my $json_text = read_file_as_string($topicsfile);
     return if (length($json_text) == 0);
 
     my $in = decode_json($json_text);
 
+    my @slide_files = get_slide_files($in->{files});
+    my $title = get_title($in->{title});
+    my $config_json = get_config_json($in->{config});
+
+    close($topicsfile);
+
+    return ($in->{title}, $config_json, @slide_files);
+}
+
+sub read_file_as_string
+{
+    my $filehandle = shift;
+    local $RS = undef;
+    my $file_str = (<$filehandle>);
+    return $file_str;
+}
+
+sub get_slide_files
+{
+    my $files_aref = shift;
     my @slide_files;
-    if (exists($in->{files})) {
-        my $files = $in->{files};
-        foreach my $elem (@$files) {
+    if (ref($files_aref) eq 'ARRAY') {
+        foreach my $elem (@$files_aref) {
             if (ref($elem)) {
                 die 'Blaargh!! Something is wrong with the JSON in "files" - found a ' . ref($elem);
             }
@@ -50,21 +67,29 @@ sub read_topicsfile
             }
         }
     }
+    return @slide_files;
+}
 
-    my $title = 'Presentation';
-    if (exists($in->{title})) {
-        $title = $in->{title};
+sub get_title
+{
+    my $in_title = shift;
+    if (defined($in_title)) {
+        return $in_title;
     }
-
-    my $config_json;
-    if (exists($in->{config})) {
-        $config_json = to_json($in->{config}, {utf8=>1, pretty=>1}); #convert back to JSON!
+    else {
+        return 'Presentation';
     }
+}
 
-    print "List of slide files: @slide_files\n";
-    close($topicsfile);
-
-    return ($in->{title}, $config_json, @slide_files);
+sub get_config_json
+{
+    my $in_config = shift;
+    if (defined($in_config)) {
+        return to_json($in_config, {utf8=>1, pretty=>1}); #convert back to JSON!
+    }
+    else {
+        return;
+    }
 }
 
 1;
