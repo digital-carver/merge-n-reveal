@@ -6,6 +6,9 @@ use English;
 
 use JSON;
 use File::Spec;
+use Exporter;
+our @EXPORT = qw(create_presentation);
+our @EXPORT_OK = qw(read_topicsfile find_content_dir); #FIXME find_content_dir shouldn't need to be exported
 
 sub create_presentation
 {

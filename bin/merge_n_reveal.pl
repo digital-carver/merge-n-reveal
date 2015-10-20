@@ -11,7 +11,7 @@ use File::Copy::Recursive qw(dircopy);
 
 use FindBin qw($Bin);
 use lib "$Bin/../lib/";
-use RevealMerger;
+use RevealMerger qw(find_content_dir read_topicsfile);
 
 sub main
 {
