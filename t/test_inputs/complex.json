@@ -1,0 +1,12 @@
+{
+    "files": [
+        "simple_file",
+        "../../somewhere/else/file"
+    ],
+    "config": {
+        "testval": 99,
+        "teststr": "str"
+    },
+    "title": "Complex Topic Spec"
+}
+

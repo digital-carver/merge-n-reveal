@@ -67,7 +67,7 @@ sub read_topics_file
     print "List of slide files: @file_list\n";
     close($topics_file);
 
-    return ($in->{title}, $in->{config}, @file_list);
+    return ($in->{title}, $config_json, @file_list);
 }
 
 1;
