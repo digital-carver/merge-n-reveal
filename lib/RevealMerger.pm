@@ -40,16 +40,15 @@ sub read_topics_file
     if (exists($in->{files})) {
         my $files = $in->{files};
         foreach my $elem (@$files) {
-            if (ref($elem) eq "HASH") {
-                while (my ($key, $val) = each(%$elem)) {
-                    push @file_list, map { $key . '/' . $_ . '.html' } @$val;
-                }
+            if (ref($elem)) {
+                die 'Blaargh!! Something is wrong with the JSON in "files" - found a ' . ref($elem);
             }
-            elsif (! ref($elem)) {
+            my ($volume, $dir, $slide_file) = File::Spec->splitpath($elem);
+            if ($volume || $dir) { #not just a filename, so just use given path
                 push @file_list, ($elem . '.html');
             }
-            else {
-                die 'Blaargh!! Something is wrong with the JSON in files - found a ' . ref($elem); 
+            else { #just a filename, so assume it's under $PWD/slides/
+                push @file_list, ('./slides/' . $elem . '.html');
             }
         }
     }
