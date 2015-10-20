@@ -7,36 +7,34 @@ use English;
 use JSON;
 use File::Spec;
 
-use Data::Dump;
-
 sub create_presentation
 {
 }
 
 sub find_content_dir
 {
-    my $topics_file_name = shift;
+    my $topicsfile_name = shift;
     # splits into drive, directory path, filename
-    my (undef, $content_dir, undef) = File::Spec->splitpath($topics_file_name);
+    my (undef, $content_dir, undef) = File::Spec->splitpath($topicsfile_name);
     return $content_dir;
 
 }
 
-sub read_topics_file
+sub read_topicsfile
 {
-    my $topics_file_name = shift;
-    die unless length($topics_file_name);
+    my $topicsfile_name = shift;
+    die unless length($topicsfile_name);
 
-    open(my $topics_file, '<', $topics_file_name) or die "Unable to open $topics_file_name: $OS_ERROR";
+    open(my $topicsfile, '<', $topicsfile_name) or die "Unable to open $topicsfile_name: $OS_ERROR";
 
     my $json_text;
-    { local $RS = undef; $json_text = (<$topics_file>);}
+    { local $RS = undef; $json_text = (<$topicsfile>);}
 
     return if (length($json_text) == 0);
 
     my $in = decode_json($json_text);
 
-    my @file_list;
+    my @slide_files;
     if (exists($in->{files})) {
         my $files = $in->{files};
         foreach my $elem (@$files) {
@@ -45,10 +43,10 @@ sub read_topics_file
             }
             my ($volume, $dir, $slide_file) = File::Spec->splitpath($elem);
             if ($volume || $dir) { #not just a filename, so just use given path
-                push @file_list, ($elem . '.html');
+                push @slide_files, ($elem . '.html');
             }
             else { #just a filename, so assume it's under $PWD/slides/
-                push @file_list, ('./slides/' . $elem . '.html');
+                push @slide_files, ('./slides/' . $elem . '.html');
             }
         }
     }
@@ -63,10 +61,10 @@ sub read_topics_file
         $config_json = to_json($in->{config}, {utf8=>1, pretty=>1}); #convert back to JSON!
     }
 
-    print "List of slide files: @file_list\n";
-    close($topics_file);
+    print "List of slide files: @slide_files\n";
+    close($topicsfile);
 
-    return ($in->{title}, $config_json, @file_list);
+    return ($in->{title}, $config_json, @slide_files);
 }
 
 1;

@@ -1,4 +1,4 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 
 use strict;
 use warnings;
@@ -15,14 +15,14 @@ use RevealMerger;
 
 sub main
 {
-    my ($topics_file_name, $reveal_repo_dir) = parse_args(\@ARGV);
+    my ($topicsfile_name, $reveal_repo_dir) = parse_args(\@ARGV);
 
-    unless (defined($topics_file_name)) {
+    unless (defined($topicsfile_name)) {
         die("Usage: $0 --topicsfile <file.json> --revealdir <path_to_reveal.js_repo>\n");
     }
 
-    my $content_dir = RevealMerger::find_content_dir($topics_file_name); 
-    my ($title, $config_json, @slide_files) = RevealMerger::read_topics_file($topics_file_name);
+    my $content_dir = RevealMerger::find_content_dir($topicsfile_name);
+    my ($title, $config_json, @slide_files) = RevealMerger::read_topicsfile($topicsfile_name);
 
     my $present_dir = File::Spec->join($content_dir, "present");
     dircopy($reveal_repo_dir, $present_dir);
@@ -72,15 +72,15 @@ CONFIG_SCRIPT
 sub parse_args
 {
     my $ARGV_REF = shift;
-    my $topics_file_name;
+    my $topicsfile_name;
     my $reveal_repo_dir;
     my $getopt_success = GetOptionsFromArray($ARGV_REF,
-                                            "topicsfile=s" => \$topics_file_name, 
+                                            "topicsfile=s" => \$topicsfile_name,
                                             "revealdir=s" => \$reveal_repo_dir);
-    unless ($getopt_success && defined($topics_file_name) && defined($reveal_repo_dir)) {
+    unless ($getopt_success && defined($topicsfile_name) && defined($reveal_repo_dir)) {
         return undef;
     }
-    return ($topics_file_name, $reveal_repo_dir);
+    return ($topicsfile_name, $reveal_repo_dir);
 }
 
 unless (defined caller) {
