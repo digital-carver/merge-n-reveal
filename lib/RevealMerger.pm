@@ -6,6 +6,7 @@ use English;
 
 use JSON;
 use File::Spec;
+use File::Copy::Recursive qw(dircopy);
 use Exporter;
 our @EXPORT = qw(create_presentation);
 our @EXPORT_OK = qw(read_topicsfile find_content_dir); #FIXME find_content_dir shouldn't need to be exported
@@ -93,6 +94,15 @@ sub get_config_json
     else {
         return;
     }
+}
+
+sub create_present_dir
+{
+    my ($reveal_repo_dir, $content_dir) = @_;
+    my $present_dir = File::Spec->join($content_dir, "present");
+    dircopy($reveal_repo_dir, $present_dir);
+    File::Copy::Recursive::pathrmdir($present_dir.'/.git/') or warn(".git folder couldn't be removed from present/ $!");
+    return $present_dir;
 }
 
 1;

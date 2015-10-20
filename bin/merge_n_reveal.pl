@@ -7,7 +7,6 @@ use English qw(-no_match_vars);
 use Getopt::Long qw(GetOptionsFromArray);
 use File::Basename;
 use File::Spec;
-use File::Copy::Recursive qw(dircopy);
 
 use FindBin qw($Bin);
 use lib "$Bin/../lib/";
@@ -25,9 +24,7 @@ sub main
     my ($title, $config_json, @slide_files) = RevealMerger::read_topicsfile($topicsfile_name);
     print_slides_list(@slide_files);
 
-    my $present_dir = File::Spec->join($content_dir, "present");
-    dircopy($reveal_repo_dir, $present_dir);
-    File::Copy::Recursive::pathrmdir($present_dir.'/.git/') or warn(".git folder couldn't be removed from present/ $!");
+    my $present_dir = RevealMerger::create_present_dir($reveal_repo_dir, $content_dir);
     open(my $reveal_index, '<', File::Spec->join($reveal_repo_dir, 'index.html')) or die "Couldn't open repo index.html: $OS_ERROR";
     open(my $presentation, '>', File::Spec->join($present_dir, 'index.html')) or die "Couldn't open present/index.html: $OS_ERROR";
 
