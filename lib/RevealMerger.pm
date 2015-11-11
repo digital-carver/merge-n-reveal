@@ -99,6 +99,13 @@ sub get_config_json
 sub create_present_dir
 {
     my ($reveal_repo_dir, $content_dir) = @_;
+
+    die "RevealJS repo directory undefined. Exiting..." unless $reveal_repo_dir;
+    die "Output directory undefined. Exiting..." unless $content_dir;
+
+    die "RevealJS repo directory $reveal_repo_dir doesn't seem to exist. Exiting..." unless -d $reveal_repo_dir;
+    die "Output directory $content_dir is supposed to already exist. Exiting..." unless -d $content_dir;
+
     my $present_dir = File::Spec->join($content_dir, "present");
     dircopy($reveal_repo_dir, $present_dir);
     File::Copy::Recursive::pathrmdir($present_dir.'/.git/') or warn(".git folder couldn't be removed from present/ $!");
