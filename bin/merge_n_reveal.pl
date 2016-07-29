@@ -20,6 +20,11 @@ sub main
         die("Usage: $0 --topicsfile <file.json> --revealdir <path_to_reveal.js_repo>\n");
     }
 
+    $topicsfile_name = File::Spec->rel2abs($topicsfile_name);
+    die "Topics file $topicsfile_name doesn't seem to exist" unless (-f $topicsfile_name);
+    $reveal_repo_dir = File::Spec->rel2abs($reveal_repo_dir);
+    die "Reveal repo dir $reveal_repo_dir doesn't seem to exist" unless (-d $reveal_repo_dir);
+
     my $content_dir = RevealMerger::find_content_dir($topicsfile_name);
     my ($title, $config_json, @slide_files) = RevealMerger::read_topicsfile($topicsfile_name);
     print_slides_list(@slide_files);
@@ -75,9 +80,12 @@ sub parse_args
     my $getopt_success = GetOptionsFromArray($ARGV_REF,
                                             "topicsfile=s" => \$topicsfile_name,
                                             "revealdir=s" => \$reveal_repo_dir);
+
     unless ($getopt_success && defined($topicsfile_name) && defined($reveal_repo_dir)) {
         return undef;
     }
+
+
     return ($topicsfile_name, $reveal_repo_dir);
 }
 
