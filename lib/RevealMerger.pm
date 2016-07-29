@@ -19,9 +19,8 @@ sub find_content_dir
 {
     my $topicsfile_name = shift;
     # splits into drive, directory path, filename
-    my (undef, $content_dir, undef) = File::Spec->splitpath($topicsfile_name);
-    return $content_dir;
-
+    my ($drive, $dir_path, undef) = File::Spec->splitpath($topicsfile_name);
+    return File::Spec->catpath($drive, $dir_path);
 }
 
 sub read_topicsfile
