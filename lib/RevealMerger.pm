@@ -3,10 +3,13 @@ package RevealMerger;
 use strict;
 use warnings;
 use English;
+use open qw(:utf8);
 
 use JSON;
 use File::Spec;
 use File::Copy::Recursive qw(dircopy);
+use HTML::TreeBuilder 5 -weak;
+
 use Exporter qw(import);
 our @EXPORT = qw(create_presentation);
 our @EXPORT_OK = qw(read_topicsfile); 
@@ -16,51 +19,58 @@ sub create_presentation
     my ($topicsfile_name, $reveal_repo_dir) = @_;
 
     my $content_dir = find_content_dir($topicsfile_name);
-    my ($title, $config_json, @slide_files) = read_topicsfile($topicsfile_name);
+    my ($title_text, $config_json, @slide_files) = read_topicsfile($topicsfile_name);
     print_slides_list(@slide_files);
 
     my $present_dir = create_present_dir($reveal_repo_dir, $content_dir);
-    open(my $reveal_index, '<', File::Spec->join($reveal_repo_dir, 'index.html')) or die "Couldn't open repo index.html: $OS_ERROR";
-    open(my $presentation, '>', File::Spec->join($present_dir, 'index.html')) or die "Couldn't open present/index.html: $OS_ERROR";
+    open(my $reveal_index, '<', File::Spec->join($reveal_repo_dir, 'index.html'))
+        or die "Couldn't open repo index.html: $OS_ERROR";
+    my $reveal_html = _get_pristine_htmltree($reveal_index);    
 
-    my $line;
-    while (($line = <$reveal_index>) !~ m/<div class="slides">/) { #FIXME regex parsing on HTML
-        $line =~ s|<title>\K(.*?)(?=</title>)|$title| if defined($title); #XXX hack upon a hack!
-        print $presentation $line;
-    }
-    print $presentation $line; #print the class="slides" line also to the file
+    open(my $presentation, '>', File::Spec->join($present_dir, 'index.html'))
+        or die "Couldn't open present/index.html: $OS_ERROR";
 
+    my $head = $reveal_html->find_by_tag_name('head');
+    my $title_el = $head->find_by_tag_name('title');
+    $title_el->splice_content(0, scalar($title_el->content_list), $title_text);
+
+    my $slides_div = $reveal_html->look_down(_tag => 'div', class => 'slides');
+    $slides_div->delete_content();
     chdir($content_dir); #JSON lists filepaths relative to itself, so cd there
     for my $slide_filename (@slide_files) {
         #$slide_filename .= '.html';
         open(my $slide_file, '<', $slide_filename) or die "Couldn't open $slide_filename: $OS_ERROR";
-        my $slide_content;
-        { local $RS = undef; $slide_content = (<$slide_file>);}
-        print $presentation $slide_content;
+
+        my $slide_html = _get_pristine_htmltree($slide_file);
+        $slides_div->push_content($slide_html); 
         close($slide_file);
     }
 
-    while (defined($line = <$reveal_index>) && ($line !~ m|<script src="lib/js/head\.min\.js"></script>|)) {
-        ; #skip all the lines till the div.slides and div.reveal get closed
-        #XXX HACK: will break if the line after the div closure changes
-    }
-    print $presentation "</div>\n</div>\n";
-    print $presentation $line; #print the head.min.js line
-    while (defined($line = <$reveal_index>)) {
-        if ($line =~ m|</body>| && defined($config_json)) { #the amount of XXX hacks is too damn high!
-            print $presentation <<CONFIG_SCRIPT
-<script>
-Reveal.configure($config_json);
-</script>
-
-CONFIG_SCRIPT
-        }
-        print $presentation $line;
+    if (defined($config_json)) {
+        my $cfg_script_tag = "<script> Reveal.configure($config_json); </script>";
+        my $cfg_script_el = HTML::TreeBuilder->new_from_content($cfg_script_tag);
+        my $body = $reveal_html->find_by_tag_name('body');
+        $body->push_content($cfg_script_el);
     }
 
+    print $presentation $reveal_html->as_HTML();
     close($presentation);
     close($reveal_index);
 }
+
+sub _get_pristine_htmltree
+{
+    my $htmlfile = shift;
+    my $htmltree = HTML::TreeBuilder->new();
+    $htmltree->no_space_compacting(1);
+    $htmltree->store_comments(1);
+    $htmltree->ignore_ignorable_whitespace(0);
+    $htmltree->ignore_unknown(0); #<section> is unknown to TreeBuilder
+    $htmltree->warn(1);
+    $htmltree->parse_file($htmlfile);
+    return $htmltree;
+}
+
 
 sub find_content_dir
 {
