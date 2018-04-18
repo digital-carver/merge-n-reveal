@@ -34,17 +34,22 @@ is_deeply(\@slide_files, ['./slides/simple_file.html', '../../somewhere/else/fil
 $result = eval { RevealMerger::create_present_dir(undef, undef); 1; };
 is($result, undef, 'create_present_dir should die for undef reveal_repo_dir and content_dir');
 
-isnt(length($ENV{REVEAL_REPO_DIR}), undef, 'REVEAL_REPO_DIR env var is defined');
-$result = eval { RevealMerger::create_present_dir($ENV{REVEAL_REPO_DIR}, undef); 1; };
-is($result, undef, 'create_present_dir should die for undef content_dir');
-
 my $content_dir = "$ENV{PWD}/t/test_inputs/";
 $result = eval { RevealMerger::create_present_dir(undef, $content_dir); 1; };
 is($result, undef, 'create_present_dir should die for undef reveal_repo_dir');
 
-RevealMerger::create_present_dir($ENV{REVEAL_REPO_DIR}, $content_dir);
-is(-d "$content_dir/present", 1, 'present directory is present');
-is(-d "$content_dir/present/.git", undef, 'present/.git is not present');
+TODO: {
+    my $reveal_repo = $ENV{REVEAL_REPO_DIR};
+    todo_skip 'Deal with giving reveal repo to tests later', 3 unless defined($reveal_repo) && length($reveal_repo) > 0;
 
+    #isnt(, undef, 'REVEAL_REPO_DIR env var is defined');
+    $result = eval { RevealMerger::create_present_dir($ENV{REVEAL_REPO_DIR}, undef); 1; };
+    is($result, undef, 'create_present_dir should die for undef content_dir');
+
+    RevealMerger::create_present_dir($ENV{REVEAL_REPO_DIR}, $content_dir);
+    is(-d "$content_dir/present", 1, 'present directory is present');
+    is(-d "$content_dir/present/.git", undef, 'present/.git is not present');
+
+};
 
 done_testing();
