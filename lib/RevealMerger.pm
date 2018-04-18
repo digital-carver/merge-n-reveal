@@ -41,14 +41,16 @@ sub create_presentation
         #$slide_filename .= '.html';
         open(my $slide_file, '<', $slide_filename) or die "Couldn't open $slide_filename: $OS_ERROR";
 
-        my $slide_html = _get_pristine_htmltree($slide_file);
+        my $slide_html = _get_pristine_htmltree($slide_file, 1);
         $slides_div->push_content($slide_html); 
+        #remove unnecessary <html> tag around every slide's content, auto-inserted by TreeBuilder
+        $slide_html->replace_with_content();
+
         close($slide_file);
     }
 
     if (defined($config_json)) {
-        my $cfg_script_tag = "<script> Reveal.configure($config_json); </script>";
-        my $cfg_script_el = HTML::TreeBuilder->new_from_content($cfg_script_tag);
+        my $cfg_script_el = _create_cfg_script_el($config_json);
         my $body = $reveal_html->find_by_tag_name('body');
         $body->push_content($cfg_script_el);
     }
@@ -61,7 +63,10 @@ sub create_presentation
 sub _get_pristine_htmltree
 {
     my $htmlfile = shift;
+    my $partial_content = shift;
+
     my $htmltree = HTML::TreeBuilder->new();
+    $htmltree->implicit_tags(0) if $partial_content;
     $htmltree->no_space_compacting(1);
     $htmltree->store_comments(1);
     $htmltree->ignore_ignorable_whitespace(0);
@@ -71,6 +76,13 @@ sub _get_pristine_htmltree
     return $htmltree;
 }
 
+sub _create_cfg_script_el
+{
+    my $config_json = shift;
+    my $cfg_script_el = HTML::Element->new('script'); 
+    $cfg_script_el->push_content("\nReveal.configure($config_json);\n");
+    return $cfg_script_el;
+}
 
 sub find_content_dir
 {
