@@ -19,8 +19,8 @@ sub create_presentation
     my ($topicsfile_name, $reveal_repo_dir) = @_;
 
     my $content_dir = find_content_dir($topicsfile_name);
-    my ($title_text, $config_json, @slide_files) = read_topicsfile($topicsfile_name);
-    print_slides_list(@slide_files);
+    my ($title_text, $theme, $slide_files_ref, $config_json) = read_topicsfile($topicsfile_name);
+    print_slides_list($slide_files_ref);
 
     my $present_dir = create_present_dir($reveal_repo_dir, $content_dir);
     open(my $reveal_index, '<', File::Spec->join($reveal_repo_dir, 'index.html'))
@@ -33,11 +33,21 @@ sub create_presentation
     my $head = $reveal_html->find_by_tag_name('head');
     my $title_el = $head->find_by_tag_name('title');
     $title_el->splice_content(0, scalar($title_el->content_list), $title_text);
+    if (defined($theme)) {
+        my $theme_css_el = $head->look_down(
+            _tag => 'link',
+            rel  => 'stylesheet',
+            href => qr{^css/theme/\S+\.css$}
+        );
+        my $old_theme_href = $theme_css_el->attr('href');
+        my $new_theme_href = ($old_theme_href =~ s|[^\/]+\.css$|${theme}.css|r);
+        $theme_css_el->attr('href', $new_theme_href);
+    }
 
     my $slides_div = $reveal_html->look_down(_tag => 'div', class => 'slides');
     $slides_div->delete_content();
     chdir($content_dir); #JSON lists filepaths relative to itself, so cd there
-    for my $slide_filename (@slide_files) {
+    for my $slide_filename (@{$slide_files_ref}) {
         #$slide_filename .= '.html';
         open(my $slide_file, '<', $slide_filename) or die "Couldn't open $slide_filename: $OS_ERROR";
 
@@ -108,10 +118,11 @@ sub read_topicsfile
     my @slide_files = get_slide_files($in->{files});
     my $title = get_title($in->{title});
     my $config_json = get_config_json($in->{config});
+    my $theme = $in->{theme};
 
     close($topicsfile);
 
-    return ($in->{title}, $config_json, @slide_files);
+    return ($in->{title}, $theme, \@slide_files, $config_json, );
 }
 
 sub read_file_as_string
@@ -183,9 +194,10 @@ sub create_present_dir
 
 sub print_slides_list
 {
+    my @slides_list = @{$_[0]};
     print "These slide files will be included:\n";
     local $LIST_SEPARATOR = "\n";
-    print "@_\n";
+    print "@slides_list\n";
 }
 
 1;
