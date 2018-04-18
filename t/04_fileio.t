@@ -5,6 +5,9 @@ use Test::More;
 use JSON;
 
 BEGIN {
+    use FindBin qw($RealBin);
+    use lib "$RealBin/../lib/";
+
     use_ok('RevealMerger');
 }
 

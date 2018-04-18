@@ -4,6 +4,9 @@ use warnings;
 use Test::More;
 
 BEGIN {
+    use FindBin qw($RealBin);
+    use lib "$RealBin/../lib/";
+
     use_ok('RevealMerger');
 }
 can_ok('RevealMerger', 'create_presentation');

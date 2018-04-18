@@ -2,7 +2,9 @@ use strict;
 use warnings;
 
 use Test::More;
+use FindBin qw($RealBin);
 
+use lib "$RealBin/../bin/";
 require_ok('merge_n_reveal.pl');
 
 my @test_argv = qw();
