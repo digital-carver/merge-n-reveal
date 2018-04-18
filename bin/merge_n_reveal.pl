@@ -35,7 +35,7 @@ sub main
 
     my $line;
     while (($line = <$reveal_index>) !~ m/<div class="slides">/) { #FIXME regex parsing on HTML
-        $line =~ s|<title>\K(.*?)(?=</title>)|$title|; #XXX hack upon a hack!
+        $line =~ s|<title>\K(.*?)(?=</title>)|$title| if defined($title); #XXX hack upon a hack!
         print $presentation $line;
     }
     print $presentation $line; #print the class="slides" line also to the file
@@ -57,7 +57,7 @@ sub main
     print $presentation "</div>\n</div>\n";
     print $presentation $line; #print the head.min.js line
     while (defined($line = <$reveal_index>)) {
-        if ($line =~ m|</body>|) { #the amount of XXX hacks is too damn high!
+        if ($line =~ m|</body>| && defined($config_json)) { #the amount of XXX hacks is too damn high!
             print $presentation <<CONFIG_SCRIPT
 <script>
 Reveal.configure($config_json);
