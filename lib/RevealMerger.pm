@@ -65,7 +65,7 @@ sub get_slide_files
             if ($volume || $dir) { #not just a filename, so just use given path
                 push @slide_files, ($elem . '.html');
             }
-            else { #just a filename, so assume it's under $PWD/slides/
+            else { #just a filename, so assume it's under $content_dir/slides/
                 push @slide_files, ('./slides/' . $elem . '.html');
             }
         }

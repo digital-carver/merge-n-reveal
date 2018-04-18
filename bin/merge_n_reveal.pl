@@ -8,8 +8,8 @@ use Getopt::Long qw(GetOptionsFromArray);
 use File::Basename;
 use File::Spec;
 
-use FindBin qw($Bin);
-use lib "$Bin/../lib/";
+use FindBin qw($RealBin);
+use lib "$RealBin/../lib/";
 use RevealMerger qw(find_content_dir read_topicsfile);
 
 sub main
@@ -51,7 +51,7 @@ sub main
     }
 
     while (defined($line = <$reveal_index>) && ($line !~ m|<script src="lib/js/head\.min\.js"></script>|)) {
-        ; #skip all the lines till the div.slides gets closed
+        ; #skip all the lines till the div.slides and div.reveal get closed
         #XXX HACK: will break if the line after the div closure changes
     }
     print $presentation "</div>\n</div>\n";
@@ -78,8 +78,8 @@ sub parse_args
     my $topicsfile_name;
     my $reveal_repo_dir;
     my $getopt_success = GetOptionsFromArray($ARGV_REF,
-                                            "topicsfile=s" => \$topicsfile_name,
-                                            "revealdir=s" => \$reveal_repo_dir);
+        "topicsfile=s" => \$topicsfile_name,
+        "revealdir=s" => \$reveal_repo_dir);
 
     unless ($getopt_success && defined($topicsfile_name) && defined($reveal_repo_dir)) {
         return undef;
