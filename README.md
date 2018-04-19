@@ -1,7 +1,7 @@
 # merge-n-reveal
-Create a single Reveal.js index file from a bunch of files containing topic-specific slides
+Create a Reveal.js presentation by merging multiple HTML slides as specified.
 
-* Step 1: Create a bunch of topic files that contain slides within \<section\> tags. Say, basic\_magic.html, thaumaturgy\_basic.html, thaumaturgy\_advanced.html, boom\_and\_kaboom.html, veil\_and\_vanish.html
+* Step 1: Create individual slides as HTML content within \<section\> tags. Say, basic\_magic.html, thaumaturgy\_basic.html, thaumaturgy\_advanced.html, boom\_and\_kaboom.html, veil\_and\_vanish.html
 
 * Step 2: When you want to create a Reveal.js presentation, decide what topics should go in this presentation, and make a JSON file similar to the ones below: 
 
@@ -35,15 +35,18 @@ Create a single Reveal.js index file from a bunch of files containing topic-spec
 }
 ```
 
-* Step 3: Run `merge_n_reveal.pl --topicsfile /path/to/your_magic.json --revealdir <reveal.js repository folder>`.
+* Step 3: Run `merge_n_reveal.pl --topicsfile content/folder/your_magic.json --revealdir <reveal.js repository folder>`.
 
-* Step 4: Check out the `present` folder within the folder that contains `your_magic.json`: that folder is now your presentation, and its index.html contains all the content from the slides you mentioned in the order you mentioned them.
+* Step 4: Check out the `present` folder under `content/folder/` (the folder that contains the json file): your presentation is now in this `present` folder. Its index.html contains the content from the slides mentioned in the manifest in order, and can be opened in any browser as a presentation. 
+
+Note: 
+
+* The `reveal.js` repository has to be downloaded separately, and then its path given as an argument to this script
+
+* If a slide is just specified by name, the script looks for it under `content/folder/slides/`. If it's a relative path, it's treated as relative to the `content/folder/` (i.e. the folder that contains the manifest json. 
 
 TODO:
 
-* Make the reading of `index.html` content more robust with HTML::TreeBuilder or something
-* Using the above tree, allow customizing the CSS theme used, make title change more robust, etc.
-* Allow changing other Reveal configuration from the JSON, implement them by adding calls to Reveal.configure() 
 * Find a way to allow discontinuous slides from a single folder. In general, make the file inclusion syntax saner (maybe just remove the complex `"{ ./subfolder_path": [ ... ] }` form and require path specification for every slide individually).
-
+* Better names for things
 
